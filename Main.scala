@@ -1,8 +1,14 @@
 import com.github.tototoshi.csv._
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.JsPath.\
+import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
+import play.api.libs.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, Json}
 
 import java.io.File
 import java.lang
+import scala.{None, Option, Some}
 import scala.util.{Failure, Success, Try}
+
 
 object Main extends App {
   val reader = CSVReader.open(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\Datasets-60922f96f3bd82568eb2bf398c404afe218f4fa0/movie_dataset.csv"))
@@ -97,9 +103,21 @@ object Main extends App {
     .flatMap(elem => elem.get("genres")).filter(k => k != "").groupBy(k => k).maxBy(k => k._2.size)._1
   println("El genero de peliculas que mas se repite en el dataset es: " + genres)
 
-  val date = data
-    .flatMap(elem => elem.get("release_date")).map(String.valueOf(k => k.split("-")[1]))//.filter(k => k != "").groupBy(k => k).maxBy(k => k._2.size)._1
+  /* val date = data
+    .flatMap(elem => elem.get("release_date")).map(String.valueOf(k => k.split("-")[1])).filter(k => k != "").groupBy(k => k).maxBy(k => k._2.size)._1
   println("El año que mas lanzamiento de peliculas hubo segun el dataset es: " + date)
 
+   */
+  val json = Json.toJson(data.flatMap(elem => elem.get("production_companies")))
+   val name =
+     (json \ "name").asOpt[String]
 
+  val name1 = name match {
+    case Some(v) => println(v)
+    case None => ""
+  }
+
+
+
+  println(name1)
 }
