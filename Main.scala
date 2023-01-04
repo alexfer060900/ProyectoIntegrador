@@ -1,8 +1,12 @@
 import com.github.tototoshi.csv._
+import com.sun.tools.javac.resources.CompilerProperties.Fragments.Location
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.JsPath.\
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
-import play.api.libs.json.{JsArray, JsBoolean, JsNull, JsNumber, JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsError, JsNull, JsNumber, JsObject, JsPath, JsString, JsSuccess, JsValue, Json, Reads, Writes}
+import org.json4s.jackson.JsonMethods._
+import org.json4s.{DefaultFormats, _}
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 
 import java.io.File
 import java.lang
@@ -108,16 +112,36 @@ object Main extends App {
   println("El año que mas lanzamiento de peliculas hubo segun el dataset es: " + date)
 
    */
-  val json = Json.toJson(data.flatMap(elem => elem.get("production_companies")))
-   val name =
-     (json \ "name").asOpt[String]
+  /*case class Companies(name: String, id: Int)
+  implicit val companiesWrites: Writes[Companies] = (
+    (JsPath \ "name").write[String] and
+      (JsPath \ "id").write[Int]
+    )(unlift(Companies.unapply))
+
+  val json = data.flatMap(elem => elem.get("production_companies").filter(k => k != "[]"))
+  val json1 = Json.toJson(json)
+
+
+  /*val name = (json \ "" \ "name").asOpt[String]
 
   val name1 = name match {
-    case Some(v) => println(v)
+    case Some(v) => v
     case None => ""
   }
 
-
-
   println(name1)
+  val json1 = data.flatMap(elem => elem.get("production_companies").filter(k => k != "[]"))
+
+
+   */
+  val name = (json1 \ "" \ """name""").get
+  println(name)
+
+
+   */
+  val json = data.flatMap(elem => elem.get("production_companies").filter(k => k != "[]"))
+  val json1 = Json.toJson(json)
+   println(json1)
+
+
 }
