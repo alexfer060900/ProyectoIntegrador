@@ -3,19 +3,32 @@ import com.sun.tools.javac.resources.CompilerProperties.Fragments.Location
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.json.{JsArray, JsBoolean, JsError, JsNull, JsNumber, JsObject, JsPath, JsString, JsSuccess, JsValue, Json, Reads, Writes}
+import com.cibo.evilplot._
+import com.cibo.evilplot.plot.{BarChart, PieChart}
+import com.cibo.evilplot.plot.aesthetics.DefaultTheme.{DefaultElements, DefaultTheme, defaultTheme}
+import requests.Response
+import scalikejdbc._
+
+import scala.language.postfixOps
+
 
 import java.io.File
 import java.lang
 import scala.{None, Option, Some}
 import scala.util.{Failure, Success, Try}
+import scala.util.matching.Regex
 
 
 object Main extends App {
   val reader = CSVReader.open(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\Datasets-60922f96f3bd82568eb2bf398c404afe218f4fa0/movie_dataset.csv"))
   val data = reader.allWithHeaders()
   reader.close()
+  Class.forName("com.mysql.cj.jdbc.Driver")
+  ConnectionPool.singleton("jdbc:mysql://localhost:3306/pintegrador", "root", "junior060900")
+  implicit val session: DBSession = AutoSession
 
-  def double(s: String): Try[Double] = {
+
+  /*def double(s: String): Try[Double] = {
     Try {
       s.toDouble
     }
@@ -103,15 +116,320 @@ object Main extends App {
     .flatMap(elem => elem.get("genres")).filter(k => k != "").groupBy(k => k).maxBy(k => k._2.size)._1
   println("El genero de peliculas que mas se repite en el dataset es: " + genres)
 
-  val json = data.flatMap(elem => elem.get("production_companies").filter(k => k != "[]"))
+  val json = data.flatMap(elem => elem.get("production_companies").filter(k => k != "[]")).toString()
   val json1 = Json.toJson(json)
+  val json2 = Json.stringify(json1)
+  val json3 = Json.parse(json2)
 
 
 
-  val name = (JsPath \"name")(json1)
+  val name = (json3 \"name").asOpt[String]
 
 
   println(name)
+
+   */
+
+  /*def replacePatterns(original : String) : String = {
+    var txtOr = original
+    val pattern: Regex = "(\\s\"(.*?)\",)".r
+    val pattern2: Regex = "([a-z]\\s\"(.*?)\"\\s*[A-Z])".r
+    val pattern3: Regex = "(:\\s'\"(.*?)',)".r
+
+
+
+    txtOr
+  }
+
+
+
+  val crew = data
+    .map(row => row("crew"))
+    .map(replacePatterns)
+    .map(text => text.replace("'", "\""))
+    .map(text => text.replace("-u0027", "'"))
+    .map(text => text.replace("-u0022", "\\\""))
+    .map(text => Try(Json.parse(text)))
+    .filter(_.isSuccess)
+    .size
+
+  println(crew)
+
+   */
+
+
+  /*def replacePattern(original: String): String = {
+    var txtOr = original
+    val pattern: Regex = "(\\s\"(.*?)\",)".r
+    for (m <- pattern.findAllIn(original)) {
+      val textOriginal = m
+      val replacementText = m.replace("'", "-u0027")
+      txtOr = txtOr.replace(textOriginal, replacementText)
+    }
+    txtOr
+  }
+
+  def replacePattern2(original: String): String = {
+    var txtOr = original
+    val pattern: Regex = "([a-z]\\s\"(.*?)\"\\s*[A-Z])".r
+    for (m <- pattern.findAllIn(original)) {
+      val textOriginal = m
+      val replacementText = m.replace("\"", "-u0022")
+      txtOr = txtOr.replace(textOriginal, replacementText)
+    }
+    txtOr
+  }
+
+  def replacePattern3(original: String): String = {
+    var txtOr = original
+    val pattern: Regex = "(:\\s'\"(.*?)',)".r
+    for (m <- pattern.findAllIn(original)) {
+      val textOriginal = m
+      val replacementText = m.replace("\"", "-u0022")
+      txtOr = txtOr.replace(textOriginal, replacementText)
+    }
+    txtOr
+  }
+
+
+  val crew2 = data
+    .map(row => row("crew"))
+    .map(replacePattern2)
+    .map(replacePattern)
+    .map(replacePattern3)
+    .map(text => text.replace("'", "\""))
+    .map(text => text.replace("-u0027", "'"))
+    .map(text => text.replace("-u0022", "\\\""))
+    .map(text => Json.parse(text))
+
+
+  println(crew2)
+
+  val departments = data
+    .filter(k => k("title") == "Avatar")
+    .map(row => row("crew"))
+    .map(replacePattern2)
+    .map(replacePattern)
+    .map(replacePattern3)
+    .map(text => text.replace("'", "\""))
+    .map(text => text.replace("-u0027", "'"))
+    .map(text => text.replace("-u0022", "\\\""))
+    .map(text => Json.parse(text))
+    .flatMap(jsonData => jsonData \\ "department")
+    .map(jsValue => jsValue.as[String])
+
+  println(departments)
+
+  val jobs = data
+    .filter(k => k("title") == "Avatar")
+    .map(row => row("crew"))
+    .map(replacePattern2)
+    .map(replacePattern)
+    .map(replacePattern3)
+    .map(text => text.replace("'", "\""))
+    .map(text => text.replace("-u0027", "'"))
+    .map(text => text.replace("-u0022", "\\\""))
+    .map(text => Json.parse(text))
+    .flatMap(jsonData => jsonData \\ "job")
+    .map(jsValue => jsValue.as[String])
+
+  println(jobs)
+
+  val crewDepartments = crew2
+    .flatMap(jsonData => jsonData \\ "department")
+    .map(jsValue => jsValue.as[String])
+    .toSeq
+
+  println(crewDepartments)
+
+  val crewJobs = crew2
+    .flatMap(jsonData => jsonData \\ "job")
+    .map(jsValue => jsValue.as[String])
+    .toSeq
+
+  println(crewJobs)
+
+  val crewId = crew2
+    .flatMap(jsonData => jsonData \\ "id")
+    .map(jsValue => jsValue.as[Int])
+    .groupBy(identity)
+    .map{case (keyword, lista) => (keyword, lista.size)}
+    .toList
+
+  println(crewId)
+
+  val popularDepartments = crew2
+    .flatMap(jsonData => jsonData \\ "department")
+    .map(jsValue => jsValue.as[String])
+    w
+
+  val departmentValues = popularDepartments.take(5).map(_._2).map(_.toDouble)
+  val departmentNames = popularDepartments.take(5).map(_._1)
+
+  /*BarChart(departmentValues)
+    .title("Departamentos mas populares")
+    .xAxis(departmentNames)
+    .yAxis()
+    .frame()
+    .yLabel("Popularidad")
+    .bottomLegend()
+    .render()
+    .write(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\histograma.png"))
+
+
+   */
+  /*val genders = crew2
+    .flatMap(jsonData => jsonData \\ "gender")
+    .map(jsValue => jsValue.as[Int])
+    .groupBy(identity)
+    .map { case (keyword, lista) => (keyword.toString, lista.size.toDouble) }
+    .toList
+
+
+  PieChart(genders)
+    .rightLegend()
+    .render()
+    .write(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\piechart.png"))
+
+   */
+
+
+
+  def actorsNames(dataRaw: String): Option[String] = {
+    val response: Response = requests
+      .post("http://api.meaningcloud.com/topics-2.0",
+        data = Map("key" -> "5e8d32277bab3b0b9028eeee11738d2f",
+          "lang" -> "en",
+          "txt" -> dataRaw,
+          "tt" -> "e"),
+        headers = Map("content-type" -> "application/x-www-form-urlencoded"))
+    Thread.sleep(1000)
+    if (response.statusCode == 200) {
+      Option(response.text)
+    } else
+      Option.empty
+  }
+
+  val cast = data
+    .map(row => row("cast"))
+    .filter(_.nonEmpty)
+    .map(StringContext.processEscapes)
+    .take(100) //Use un número limitado para hacer sus pruebas, pero, al final debe analizar todos los datos.
+    .map(actorsNames)
+    .map(json => Try(Json.parse(json.get)))
+    .filter(_.isSuccess)
+    .map(_.get)
+    .flatMap(json => json("entity_list").as[JsArray].value)
+    .map(_("form"))
+    .map(data => data.as[String])
+
+  println(cast)
+
+  sql"""
+  CREATE TABLE CAST (
+  NAME varchar(64) DEFAULT NULL
+  )
+  """.execute.apply()
+
+  cast.foreach  {
+    row => sql"insert into cast (name) values (${row})"
+  .update.apply()
+  }
+
+  val entities = sql"SELECT * FROM CAST WHERE (NAME = 'Will Smith')".map(_.toMap()).list.apply()
+
+  println(entities)
+
+
+
+
+
+  //sql"DROP TABLE CAST".update.apply()
+
+   */
+
+  def actorsNames(dataRaw: String): Option[String] = {
+    val response: Response = requests
+      .post("http://api.meaningcloud.com/topics-2.0",
+        data = Map("key" -> "su API_KEY debe ir aquí",
+          "lang" -> "en",
+          "txt" -> dataRaw,
+          "tt" -> "e"),
+        headers = Map("content-type" -> "application/x-www-form-urlencoded"))
+    Thread.sleep(1000)
+    if (response.statusCode == 200) {
+      Option(response.text)
+    } else
+      Option.empty
+  }
+  def transform (jsValue: JsValue) =
+    jsValue("entity_list").as[JsArray].value
+      .map(_("form"))
+      .map(_.as[String])
+      .toList
+
+  val castId = data
+    .map( row => (row("id"), row("data")))
+    .filter(_._2.nonEmpty)
+    .map(tuple2 => (tuple2._1, StringContext.processEscapes(tuple2._2)))
+    .take(10)
+    .map{t2 => (t2._1, actorsNames(t2._2))}
+    .map{t2 => (t2._1, Try(Json.parse(t2._2.get)))}
+    .filter(_._2.isSuccess)
+    .map(t2 => (t2._1, t2._2.get))
+    .map(t2 => (t2._1, transform(t2._2)))
+    .flatMap(t2 => t2._2.map(name => (t2._1, name)))
+    .map(_.productIterator.toList)
+    .distinct
+
+  val f = new File ("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\movie-cast.csv")
+  val writer = CSVWriter.open(f)
+  writer.writeAll(castId)
+  writer.close()
+
+  case class Movie(id: String,
+                   originalLanguage: String,
+                   originalTitle: String,
+                   budget : Long,
+                   popularity: Double,
+                   runtime: Double,
+                   revenue: Long)
+
+  val movieData = data
+    .map(row => Movie(
+      row("id"),
+      row("original_language"),
+      row("original_title"),
+      row("budget").toLong,
+      row("popularity").toDouble,
+      row("runtime") match {
+        case valueofRT if valueofRT.trim.isEmpty => 0.0
+        case valueofRT => valueofRT.toDouble
+      },
+      row("revenue").toLong))
+
+  val SQL_INSERT_PATTERN =
+    """INSERT INTO MOVIE(`RAW_ID`, `ORIGINAL_TITLE`, `BUDGET`, `POPULARITY`, `RUNTIME`, `REVENUE`, `ORIGINAL_LANGUAGE`)
+    VALUES
+    ('%s', '%s', %d, %f, %f, %d, '%s');
+    """.stripMargin
+
+  def escapeMySql(text: String): String = text
+    .replaceAll("\\\\", "\\\\\\\\")
+    .replaceAll("\b", "\\\\b")
+    .replaceAll("\n", "\\\\n")
+    .replaceAll("\r", "\\\\r")
+    .replaceAll("\t", "\\\\t")
+    .replaceAll("\\x1A", "\\\\Z")
+    .replaceAll("\\x00", "\\\\0")
+    .replaceAll("'", "\\\\'")
+    .replaceAll("\"", "\\\\\"")
+
+  val scriptData = movieData
+    .map(movie => SQL_INSERT_PATTERN.formatLocal(java.util.Locale.US))
+
+
+
 
 
 }
