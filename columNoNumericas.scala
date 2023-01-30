@@ -1,0 +1,3 @@
+object columNoNumericas extends App {
+
+}
