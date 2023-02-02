@@ -7,7 +7,6 @@ import com.cibo.evilplot._
 import com.cibo.evilplot.plot.{BarChart, PieChart}
 import com.cibo.evilplot.plot.aesthetics.DefaultTheme.{DefaultElements, DefaultTheme, defaultTheme}
 import requests.Response
-import scalikejdbc._
 
 import scala.language.postfixOps
 
@@ -23,9 +22,6 @@ object Main extends App {
   val reader = CSVReader.open(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\Datasets-60922f96f3bd82568eb2bf398c404afe218f4fa0/movie_dataset.csv"))
   val data = reader.allWithHeaders()
   reader.close()
-  Class.forName("com.mysql.cj.jdbc.Driver")
-  ConnectionPool.singleton("jdbc:mysql://localhost:3306/pintegrador", "root", "junior060900")
-  implicit val session: DBSession = AutoSession
 
 
   /*def double(s: String): Try[Double] = {
@@ -128,9 +124,8 @@ object Main extends App {
 
   println(name)
 
-   */
 
-  /*def replacePatterns(original : String) : String = {
+  def replacePatterns(original : String) : String = {
     var txtOr = original
     val pattern: Regex = "(\\s\"(.*?)\",)".r
     val pattern2: Regex = "([a-z]\\s\"(.*?)\"\\s*[A-Z])".r
@@ -155,10 +150,7 @@ object Main extends App {
 
   println(crew)
 
-   */
-
-
-  /*def replacePattern(original: String): String = {
+  def replacePattern(original: String): String = {
     var txtOr = original
     val pattern: Regex = "(\\s\"(.*?)\",)".r
     for (m <- pattern.findAllIn(original)) {
@@ -261,12 +253,11 @@ object Main extends App {
   val popularDepartments = crew2
     .flatMap(jsonData => jsonData \\ "department")
     .map(jsValue => jsValue.as[String])
-    w
 
   val departmentValues = popularDepartments.take(5).map(_._2).map(_.toDouble)
   val departmentNames = popularDepartments.take(5).map(_._1)
 
-  /*BarChart(departmentValues)
+  BarChart(departmentValues)
     .title("Departamentos mas populares")
     .xAxis(departmentNames)
     .yAxis()
@@ -277,8 +268,7 @@ object Main extends App {
     .write(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\histograma.png"))
 
 
-   */
-  /*val genders = crew2
+  val genders = crew2
     .flatMap(jsonData => jsonData \\ "gender")
     .map(jsValue => jsValue.as[Int])
     .groupBy(identity)
@@ -290,8 +280,6 @@ object Main extends App {
     .rightLegend()
     .render()
     .write(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\piechart.png"))
-
-   */
 
 
 
@@ -341,12 +329,7 @@ object Main extends App {
   println(entities)
 
 
-
-
-
-  //sql"DROP TABLE CAST".update.apply()
-
-   */
+  sql"DROP TABLE CAST".update.apply()
 
   def actorsNames(dataRaw: String): Option[String] = {
     val response: Response = requests
@@ -429,6 +412,8 @@ object Main extends App {
     .map(movie => SQL_INSERT_PATTERN.formatLocal(java.util.Locale.US))
 
 
+
+   */
 
 
 
