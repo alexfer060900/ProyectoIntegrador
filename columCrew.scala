@@ -52,7 +52,7 @@ object columCrew extends App {
     .map(text => text.replace("-u0027", "'"))
     .map(text => text.replace("-u0022", "\\\""))
     .map(text => Json.parse(text))
-    .flatMap(js => js \\ "name" )
+    .flatMap(js => js \\ "department" )
     .map(js => js.as[String])
     .distinct
 

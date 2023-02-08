@@ -1,13 +1,36 @@
-import columNumericas.max
 import com.github.tototoshi.csv.CSVReader
 
 import java.io.File
 import scala.util.Try
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import com.cibo.evilplot.demo.DemoPlots.theme
+import com.cibo.evilplot.plot.Histogram
+import com.cibo.evilplot.plot.aesthetics.DefaultTheme.{DefaultElements, DefaultTheme}
+
 
 object columNumericas extends App {
   val reader = CSVReader.open(new File("C:\\Users\\alexa\\Desktop\\UNIVERSIDAD\\Datasets-60922f96f3bd82568eb2bf398c404afe218f4fa0/movie_dataset.csv"))
   val data = reader.allWithHeaders()
   reader.close()
+
+  val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val releaseDateList = data
+    .map(row => row("release_date"))
+    .filter(!_.equals(""))
+    .map(text => LocalDate.parse(text, dateFormatter))
+
+  val yearReleaseList = releaseDateList
+    .map(_.getYear)
+    .map(_.toDouble)
+
+  Histogram(yearReleaseList)
+    .title("Años de lanzamiento mas populares")
+    .xAxis()
+    .yAxis()
+    .xbounds(1916.0, 2018.0)
+    .render()
+    .write(new File("C:\\Users\\alexa\\Desktop\\añosLanzamientoPeliculas.png"))
 
   def double(s: String): Try[Double] = {
     Try {
@@ -42,6 +65,13 @@ object columNumericas extends App {
   val budgetMax = max(presupuesto)
   val budgetMin = min(presupuesto)
   val budgetAverage = average(presupuesto)
+
+  Histogram(presupuesto)
+    .title("Presupuesto de peliculas y su frecuencia")
+    .xAxis()
+    .yAxis()
+    .render()
+    .write(new File("C:\\Users\\alexa\\Desktop\\presupuestoPeliculas.png"))
 
   println("El presupuesto maximo que tuvo una pelicula: " + budgetMax +
     "\nEl presupuesto minimo que tuvo una pelicula es: " + budgetMin +

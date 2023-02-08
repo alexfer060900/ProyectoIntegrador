@@ -1,5 +1,5 @@
 import com.cibo.evilplot.demo.DemoPlots.theme
-import com.cibo.evilplot.plot.BarChart
+import com.cibo.evilplot.plot.{BarChart, Histogram}
 import com.cibo.evilplot.plot.aesthetics.DefaultTheme.{DefaultElements, DefaultTheme}
 import com.github.tototoshi.csv.CSVReader
 import play.api.libs.json.Json
